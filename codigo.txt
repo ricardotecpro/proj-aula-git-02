@@ -1,1 +1,5 @@
-Aula de GIT e GitHub
+Aula de GIT e GitHub ;
+Explicando como funciona o PULL do REMOTO para o LOCAL 
+
+Top
+

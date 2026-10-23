@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Masterclass Git & GitHub: Aula 02 - Sincronização Remota</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: #111827;
+      --border-color: #1f2937;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --primary: #3b82f6; /* Blue Accent */
+      --cyan: #06b6d4; /* Cyan Accent */
+      --secondary: #10b981; /* Emerald Green */
+      --rose: #f43f5e; /* Rose */
+      --shadow-color: rgba(59, 130, 246, 0.2);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      line-height: 1.6;
+      padding-bottom: 80px;
+    }
+
+    header {
+      background: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+      border-bottom: 1px solid var(--border-color);
+      padding: 60px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, transparent 60%);
+      animation: pulse 12s infinite alternate;
+      z-index: 0;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 0.5; }
+      100% { transform: scale(1.1); opacity: 0.9; }
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 20px;
+    }
+
+    .badge-blue {
+      background-color: rgba(59, 130, 246, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    h1 {
+      font-size: 3rem;
+      font-weight: 800;
+      background: linear-gradient(to right, #60a5fa, #38bdf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 35px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      transition: border-color 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    p {
+      color: var(--text-muted);
+      margin-bottom: 25px;
+      font-size: 1.05rem;
+    }
+
+    /* Explanation Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .grid-item {
+      background-color: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .grid-item h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Interactive Simulation */
+    .simulation-container {
+      background-color: #05070c;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 30px;
+    }
+
+    .track-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .track {
+      background-color: rgba(255, 255, 255, 0.01);
+      border: 1px solid #111827;
+      border-radius: 12px;
+      padding: 20px;
+      min-height: 100px;
+      margin-bottom: 25px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      overflow-x: auto;
+    }
+
+    .network-line {
+      height: 2px;
+      background: repeating-linear-gradient(to right, transparent, transparent 4px, var(--border-color) 4px, var(--border-color) 8px);
+      margin: 15px 0;
+      position: relative;
+    }
+
+    .commit-node {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background-color: var(--bg-card);
+      border: 3px solid var(--primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      position: relative;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+      animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      flex-shrink: 0;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.6); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .commit-node::after {
+      content: '';
+      position: absolute;
+      right: -18px;
+      width: 15px;
+      height: 2px;
+      background-color: var(--border-color);
+    }
+
+    .commit-node:last-child::after {
+      display: none;
+    }
+
+    .commit-node.remote-only {
+      border-color: var(--rose);
+      box-shadow: 0 0 10px rgba(244, 63, 94, 0.2);
+    }
+
+    .commit-node.fetched-only {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+    }
+
+    .commit-node.merged {
+      border-color: var(--secondary);
+      box-shadow: 0 0 10px rgba(16, 185, 129, 0.2);
+    }
+
+    .branch-pointer {
+      position: absolute;
+      bottom: -22px;
+      font-size: 0.75rem;
+      background-color: #1e293b;
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    .pointer-origin-main {
+      border-color: var(--rose);
+      color: #fda4af;
+    }
+
+    .pointer-main {
+      border-color: var(--secondary);
+      color: #a7f3d0;
+    }
+
+    /* Simulation Control Console */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      font-family: 'Outfit', sans-serif;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      font-size: 0.95rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 2px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover:not(:disabled) {
+      border-color: var(--text-main);
+    }
+
+    .btn-blue {
+      background-color: var(--primary);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--shadow-color);
+    }
+
+    .btn-blue:hover:not(:disabled) {
+      background-color: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    .btn-cyan {
+      background-color: var(--cyan);
+      color: #0f172a;
+    }
+
+    .btn-cyan:hover:not(:disabled) {
+      background-color: #22d3ee;
+      transform: translateY(-2px);
+    }
+
+    .btn-green {
+      background-color: var(--secondary);
+      color: #0f172a;
+    }
+
+    .btn-green:hover:not(:disabled) {
+      background-color: #34d399;
+      transform: translateY(-2px);
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .console-log {
+      margin-top: 25px;
+      background-color: #02040a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 15px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #60a5fa;
+      min-height: 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="badge badge-blue">Sincronização de Códigos</div>
+    <h1>Entendendo o Git Pull e Fetch</h1>
+    <p>Aprenda como obter as atualizações feitas em um repositório remoto (GitHub) e sincronizá-las no seu computador de forma segura.</p>
+  </header>
+
+  <div class="container">
+    
+    <!-- Seção 1: Conceito Principal -->
+    <div class="card">
+      <h2><span>📡</span> Sincronização: Remoto vs Local</h2>
+      <p>Quando múltiplos desenvolvedores trabalham no mesmo repositório, ou quando você trabalha de computadores diferentes, o repositório remoto (GitHub) avança enquanto seu repositório local fica desatualizado. Para sincronizar, você tem duas abordagens primárias:</p>
+      
+      <div class="grid">
+        <div class="grid-item">
+          <h3><span>🔍</span> git fetch</h3>
+          <p>Baixa o histórico e as ramificações do repositório remoto para a sua máquina (atualiza a ramificação <code>origin/main</code>), mas <strong>não altera nem funde</strong> nada no seu diretório de trabalho atual.</p>
+        </div>
+        <div class="grid-item">
+          <h3><span>⚡</span> git pull</h3>
+          <p>Faz um atalho inteligente: executa automaticamente um <code>git fetch</code> seguido imediatamente por um <code>git merge</code> das ramificações remotas na sua branch local ativa.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Seção 2: Simulador Visual Interativo -->
+    <div class="card">
+      <h2><span>🎮</span> Simulador de Atualização Remota</h2>
+      <p>Use os controles abaixo para simular commits sendo adicionados no GitHub e veja na prática como o <code>fetch</code>, <code>merge</code> e <code>pull</code> alteram os ponteiros de desenvolvimento locais.</p>
+      
+      <div class="simulation-container">
+        
+        <!-- Track 1: GitHub Remote -->
+        <div class="track-title">
+          <span>☁️ Servidor Remoto (GitHub / Origin)</span>
+          <span style="color:var(--rose)">origin/main</span>
+        </div>
+        <div class="track" id="track-remote">
+          <!-- Commits will render here -->
+        </div>
+
+        <div class="network-line"></div>
+
+        <!-- Track 2: Local Repo -->
+        <div class="track-title">
+          <span>💻 Computador Local (Seu Repositório)</span>
+          <span style="color:var(--secondary)">main (local)</span>
+        </div>
+        <div class="track" id="track-local">
+          <!-- Commits will render here -->
+        </div>
+
+        <div class="controls">
+          <button class="btn btn-blue" id="btn-add-remote">☁️ Novo Commit Remoto</button>
+          <button class="btn btn-cyan" id="btn-git-fetch" disabled>git fetch 🔍</button>
+          <button class="btn btn-green" id="btn-git-merge" disabled>git merge 🧬</button>
+          <button class="btn btn-outline" id="btn-git-pull" disabled>git pull ⚡</button>
+          <button class="btn btn-outline" id="btn-reset" style="color:var(--rose); border-color:var(--rose)">Resetar</button>
+        </div>
+
+        <div class="console-log" id="console-output">
+          $ Pressione "Novo Commit Remoto" para simular um colega de trabalho subindo código para o GitHub.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // State management
+    let remoteCommits = ['C1', 'C2'];
+    let localCommits = ['C1', 'C2'];
+    let fetchedCommits = ['C1', 'C2']; // what the local repo knows about remote
+    
+    const trackRemote = document.getElementById('track-remote');
+    const trackLocal = document.getElementById('track-local');
+    const consoleOutput = document.getElementById('console-output');
+    
+    const btnAddRemote = document.getElementById('btn-add-remote');
+    const btnGitFetch = document.getElementById('btn-git-fetch');
+    const btnGitMerge = document.getElementById('btn-git-merge');
+    const btnGitPull = document.getElementById('btn-git-pull');
+    const btnReset = document.getElementById('btn-reset');
+    
+    function log(message) {
+      consoleOutput.innerHTML = `$ ${message}`;
+    }
+    
+    function render() {
+      // Render Remote Track
+      trackRemote.innerHTML = '';
+      remoteCommits.forEach((c, idx) => {
+        const node = document.createElement('div');
+        node.className = 'commit-node remote-only';
+        node.innerText = c;
+        
+        if (idx === remoteCommits.length - 1) {
+          const ptr = document.createElement('div');
+          ptr.className = 'branch-pointer pointer-origin-main';
+          ptr.innerText = 'origin/main (GitHub)';
+          node.appendChild(ptr);
+        }
+        trackRemote.appendChild(node);
+      });
+      
+      // Render Local Track
+      trackLocal.innerHTML = '';
+      localCommits.forEach((c, idx) => {
+        const node = document.createElement('div');
+        node.className = 'commit-node merged';
+        node.innerText = c;
+        
+        if (idx === localCommits.length - 1) {
+          const ptr = document.createElement('div');
+          ptr.className = 'branch-pointer pointer-main';
+          ptr.innerText = 'main (Local)';
+          node.appendChild(ptr);
+        }
+        trackLocal.appendChild(node);
+      });
+      
+      // Render fetched tracking in Local track if fetch has occurred
+      fetchedCommits.forEach((c, idx) => {
+        // If local track doesn't contain this commit yet, render it as fetched
+        if (!localCommits.includes(c)) {
+          const node = document.createElement('div');
+          node.className = 'commit-node fetched-only';
+          node.innerText = c;
+          
+          if (idx === fetchedCommits.length - 1) {
+            const ptr = document.createElement('div');
+            ptr.className = 'branch-pointer pointer-origin-main';
+            ptr.innerText = 'origin/main (fetched)';
+            node.appendChild(ptr);
+          }
+          trackLocal.appendChild(node);
+        }
+      });
+      
+      // Update Buttons
+      const needsFetch = remoteCommits.length > fetchedCommits.length;
+      const needsMerge = fetchedCommits.length > localCommits.length;
+      
+      btnGitFetch.disabled = !needsFetch;
+      btnGitMerge.disabled = !needsMerge;
+      btnGitPull.disabled = !needsFetch && !needsMerge; // only enabled when remote is ahead
+      
+      if (needsFetch) {
+        btnGitPull.disabled = false;
+      }
+    }
+    
+    btnAddRemote.addEventListener('click', () => {
+      const nextCommitNum = remoteCommits.length + 1;
+      const commitName = `C${nextCommitNum}`;
+      remoteCommits.push(commitName);
+      log(`Novo commit remoto '${commitName}' enviado por outro desenvolvedor ao GitHub.<br>Seu computador ainda não sabe disso.`);
+      render();
+    });
+    
+    btnGitFetch.addEventListener('click', () => {
+      fetchedCommits = [...remoteCommits];
+      log(`git fetch origin<br>Buscando referências remotas do GitHub... Ponteiro 'origin/main' atualizado localmente para '${fetchedCommits[fetchedCommits.length - 1]}'.<br>Os arquivos no seu diretório de trabalho continuam inalterados.`);
+      render();
+    });
+    
+    btnGitMerge.addEventListener('click', () => {
+      localCommits = [...fetchedCommits];
+      log(`git merge origin/main<br>Atualizando branch 'main' local por avanço rápido (fast-forward)...<br>Os arquivos locais foram fundidos e atualizados.`);
+      render();
+    });
+    
+    btnGitPull.addEventListener('click', () => {
+      fetchedCommits = [...remoteCommits];
+      localCommits = [...remoteCommits];
+      log(`git pull origin main<br>Executando Fetch e Merge simultâneos...<br>Ambiente de trabalho local sincronizado e atualizado diretamente com o GitHub.`);
+      render();
+    });
+    
+    btnReset.addEventListener('click', () => {
+      remoteCommits = ['C1', 'C2'];
+      localCommits = ['C1', 'C2'];
+      fetchedCommits = ['C1', 'C2'];
+      log("Simulador resetado com sucesso.");
+      render();
+    });
+    
+    // Initial Render
+    render();
+  </script>
+</body>
+</html>

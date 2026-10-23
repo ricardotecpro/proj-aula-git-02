@@ -1,0 +1,3 @@
+workspace = "default"
+project = "proj-aula-git-02"
+project_strategy = "repo-root"
